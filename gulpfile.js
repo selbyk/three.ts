@@ -6,7 +6,7 @@ var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var buffer = require('vinyl-buffer');
 var paths = {
-    pages: ['src/*.html', 'src/*.css']
+    pages: ['src/*.html', 'src/*.css', 'src/*.png']
 };
 var webserver = require('gulp-webserver');
 var awspublish = require('gulp-awspublish');
@@ -16,7 +16,7 @@ var del = require('del');
 /**
  * Publish files to S3
  */
-gulp.task('publish', function() {
+gulp.task('publish', ['bundle'], function() {
     // create a new publisher using S3 options
     // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
     var publisher = awspublish.create({
@@ -97,7 +97,7 @@ gulp.task('bundle', function() {
  */
 function watch() {
     // Watch our assets
-    var assetWatcher = gulp.watch(paths.pages, ['copy-html']);
+    var assetWatcher = gulp.watch(paths.pages, ['copy-assets']);
     assetWatcher.on('change', function(event) {
         console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
     });
@@ -109,5 +109,5 @@ function watch() {
     });
 }
 
-gulp.task('build', ['copy-html', 'build-ts']);
-gulp.task('default', ['copy-html', 'webserver', 'build-ts'], watch);
+gulp.task('build', ['copy-assets', 'build-ts']);
+gulp.task('default', ['copy-assets', 'webserver', 'build-ts'], watch);

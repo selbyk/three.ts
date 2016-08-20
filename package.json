@@ -2,7 +2,7 @@
   "name": "three.ts",
   "version": "1.0.0",
   "description": "A Typescript 'Hello World' example project that utilizes Three.js and jQuery through Typings.",
-  "main": "gulp",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +19,6 @@
     "gulp-webserver": "^0.9.1",
     "tsify": "^1.0.3",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0",
+    "vinyl-source-stream": "^1.1.0"
   }
 }
