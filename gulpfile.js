@@ -67,7 +67,7 @@ gulp.task('build-ts', ['bundle'], function(cb) {
     ];
 
     // Clean up leftover js files
-    del(typeScriptGenFiles, cb);
+    return del(typeScriptGenFiles, cb);
 });
 
 /**
