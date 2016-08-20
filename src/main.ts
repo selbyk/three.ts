@@ -1,7 +1,7 @@
-/// <reference path="typings/tsd.d.ts" />
-import { sayHello } from "./greet";
-import { render as renderCube } from "./cube";
-//import * as cube from "./cube";
+/// <reference path='typings/tsd.d.ts' />
+import { sayHello } from './greet';
+import { render as renderCube } from './cube';
+//import * as cube from './cube';
 
 function showHello(divName: string, name: string) {
     const elt = $(`#${divName}`);//document.getElementById(divName);
@@ -13,5 +13,5 @@ function render() {
   //cube.render();
 }
 
-showHello("greeting", "TypeScript");
+showHello('greeting', 'TypeScript');
 render();

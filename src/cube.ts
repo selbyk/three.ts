@@ -1,3 +1,4 @@
+/// <reference path='typings/tsd.d.ts' />
 // set the scene size
 let WIDTH = 250,
     HEIGHT = 250;
@@ -11,13 +12,11 @@ let VIEW_ANGLE = 75,
 // get the DOM element to attach to
 // - assume we've got jQuery to hand
 const canvas = $('#threetest');
-//let canvas = document.getElementById("threetest");
-
 
 // create a WebGL renderer, camera
 // and a scene
 let renderer = new THREE.WebGLRenderer({
-    canvas: canvas.get(0),
+    canvas: <HTMLCanvasElement>canvas.get(0),
     alpha: true,     // transparent background
     antialias: true // smooth edges
 });
@@ -44,12 +43,6 @@ camera.position.z = 5; // move camera back so we can see the cube
 
 // start the renderer
 renderer.setSize(WIDTH, HEIGHT);
-
-// attach the render-supplied DOM element
-//canvas.append(renderer.domElement);
-
-//document.body.appendChild(renderer.domElement);
-
 
 export function render() {
     requestAnimationFrame(render);

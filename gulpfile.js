@@ -1,9 +1,8 @@
 var gulp = require('gulp');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
-var watchify = require("watchify");
-var tsify = require("tsify");
-var gutil = require("gulp-util");
+var tsify = require('tsify');
+var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var buffer = require('vinyl-buffer');
 var paths = {
@@ -11,10 +10,13 @@ var paths = {
 };
 var webserver = require('gulp-webserver');
 var awspublish = require('gulp-awspublish');
-var parallelize = require("concurrent-transform");
+var parallelize = require('concurrent-transform');
+var del = require('del');
 
+/**
+ * Publish files to S3
+ */
 gulp.task('publish', function() {
-
     // create a new publisher using S3 options
     // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
     var publisher = awspublish.create({
@@ -24,32 +26,20 @@ gulp.task('publish', function() {
         },
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    }, {
-        cacheFileName: 'your-cache-location'
     });
 
-    // define custom headers
-    var headers = {
-        'Cache-Control': 'max-age=315360000, no-transform, public'
-            // ...
-    };
-
     return gulp.src('./dist/*')
+        // process in parallelize with concurrency 10
         .pipe(parallelize(publisher.publish(), 10))
+        // sync instead of just posting
         .pipe(publisher.sync())
-        // gzip, Set Content-Encoding headers and add .gz extension
-        //.pipe(awspublish.gzip({
-        //    ext: '.gz'
-        //}))
-        // publisher will add Content-Length, Content-Type and headers specified above
-        // If not specified it will set x-amz-acl to public-read by default
-        //.pipe(publisher.publish(headers))
-        // create a cache file to speed up consecutive uploads
-        //.pipe(publisher.cache())
         // print upload updates to console
         .pipe(awspublish.reporter());
 });
 
+/**
+ * Start webserver with live reload
+ */
 gulp.task('webserver', function() {
     gulp.src('dist')
         .pipe(webserver({
@@ -58,26 +48,40 @@ gulp.task('webserver', function() {
         }));
 });
 
-gulp.task('copy-html', function() {
+/**
+ * Copy asset files
+ */
+gulp.task('copy-assets', function() {
     return gulp.src(paths.pages)
         .pipe(gulp.dest('dist'));
 });
 
-var watcher = gulp.watch(paths.pages, ['copy-html']);
-watcher.on('change', function(event) {
-  console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+/**
+ * Build and bundle TypeScript, then remove all generated JavaScript files from TypeScript compilation.
+ */
+gulp.task('build-ts', ['bundle'], function(cb) {
+    var typeScriptGenFiles = [
+        'src/**/*.js', // path to all JS files auto gen'd by editor
+        'src/**/*.js.map', // path to all sourcemap files auto gen'd by editor
+        '!src/lib'
+    ];
+
+    // Clean up leftover js files
+    del(typeScriptGenFiles, cb);
 });
 
-var watchedBrowserify = watchify(browserify({
-    basedir: '.',
-    debug: true,
-    entries: ['src/main.ts'],
-    cache: {},
-    packageCache: {}
-}).plugin(tsify));
-
-function bundle() {
-    return watchedBrowserify
+/**
+ * Bundle JavaScript files generated from TypeScript compilation.
+ */
+gulp.task('bundle', function() {
+    return browserify({
+            basedir: '.',
+            debug: true,
+            entries: ['src/main.ts'],
+            cache: {},
+            packageCache: {}
+        })
+        .plugin(tsify)
         .bundle()
         .pipe(source('bundle.js'))
         .pipe(buffer())
@@ -86,8 +90,24 @@ function bundle() {
         }))
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dist'));
+});
+
+/**
+ * Watch source files for changes to update dist files
+ */
+function watch() {
+    // Watch our assets
+    var assetWatcher = gulp.watch(paths.pages, ['copy-html']);
+    assetWatcher.on('change', function(event) {
+        console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+    });
+
+    // Watch our ts
+    var tsWatcher = gulp.watch('src/**/*.ts', ['build-ts']);
+    tsWatcher.on('change', function(event) {
+        console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+    });
 }
 
-gulp.task("default", ["copy-html", 'webserver'], bundle);
-watchedBrowserify.on("update", bundle);
-watchedBrowserify.on("log", gutil.log);
+gulp.task('build', ['copy-html', 'build-ts']);
+gulp.task('default', ['copy-html', 'webserver', 'build-ts'], watch);
