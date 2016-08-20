@@ -1,0 +1,43 @@
+html, body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#threetest {
+    height: 250px;
+    width: 250px;
+}
+
+#container {
+    align-self: center;
+    text-align: center;
+}
+
+/* link */
+a {
+    color: #000;
+    text-decoration: none;
+}
+
+/* unvisited link */
+a:link {
+    color: #000;
+}
+
+/* visited link */
+a:visited {
+    color: #000;
+}
+
+/* mouse over link */
+a:hover {
+    color: #000;
+}
+
+/* selected link */
+a:active {
+    color: #000;
+}
