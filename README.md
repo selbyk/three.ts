@@ -1,7 +1,7 @@
 three.ts
 ---
 
-A Typescript 'Hello World' example project that utilizes Three.js and jQuery through Typings.
+A Typescript 'Hello World' example project that utilizes Three.js and jQuery through DefinitelyTyped typings.
 
 [![Screenshot](http://three-ts.selby.io/screenshot.png)](http://three-ts.selby.io)
 
