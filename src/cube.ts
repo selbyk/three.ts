@@ -26,6 +26,10 @@ const camera = new THREE.PerspectiveCamera(
     NEAR,
     FAR);
 
+/**
+ * Creates a new cube object
+ * @return {THREE.Mesh} a cube
+ */
 function createCube(){
   let geometry = new THREE.BoxGeometry(1, 1, 1);
   let material = new THREE.MeshNormalMaterial();
@@ -43,6 +47,10 @@ camera.position.z = 2;
 // set the renderer size
 renderer.setSize(WIDTH, HEIGHT);
 
+/**
+ * Renders the scene
+ * @return {void}
+ */
 export function render() {
     requestAnimationFrame(render);
     renderer.render(scene, camera);
