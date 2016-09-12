@@ -8,55 +8,111 @@ let ASPECT = WIDTH / HEIGHT;
 let NEAR = 0.1;
 let FAR = 1000;
 
-// get the DOM element to attach to
-// - assume we've got jQuery to hand
-const canvas = $('#3dcube');
+export default class Cube {
+    selector: string;
+    canvasElement: JQuery;
+    renderer: THREE.WebGLRenderer;
+    scene: THREE.Scene;
+    camera: THREE.PerspectiveCamera;
+    geometry: THREE.BoxGeometry;
+    material: THREE.MeshNormalMaterial;
 
-// create a WebGL renderer, camera
-// and a scene
-const renderer = new THREE.WebGLRenderer({
-    canvas: <HTMLCanvasElement>canvas.get(0),
-    alpha: true,     // transparent background
-    antialias: true // smooth edges
-});
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-    VIEW_ANGLE,
-    ASPECT,
-    NEAR,
-    FAR);
+    cube: THREE.Mesh;
 
-/**
- * Creates a new cube object
- * @return {THREE.Mesh} a cube
- */
-function createCube(){
-  let geometry = new THREE.BoxGeometry(1, 1, 1);
-  let material = new THREE.MeshNormalMaterial();
-  return new THREE.Mesh(geometry, material);
+    rotVelocities = {
+        x: 0.01,
+        y: 0.01,
+        z: 0.01
+    };
+
+    constructor(selector: string) {
+        this.selector = selector;
+        this.canvasElement = $(this.selector);
+        this.renderer = new THREE.WebGLRenderer({
+            canvas: <HTMLCanvasElement>this.canvasElement.get(0),
+            alpha: true,     // transparent background
+            antialias: true // smooth edges
+        });
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(
+            VIEW_ANGLE,
+            ASPECT,
+            NEAR,
+            FAR);
+        this.cube = Cube.createCube();
+        // create a cube and add it to the scene
+        this.scene.add(this.cube);
+        // add the camera to the scene
+        this.scene.add(this.camera);
+        // move camera back so we can see the cube
+        this.camera.position.z = 2;
+        // set the renderer size
+        this.renderer.setSize(WIDTH, HEIGHT);
+    }
+
+    /**
+     * Creates a new cube object
+     * @return {THREE.Mesh} a cube
+     */
+    static createCube(width = 1, height = 1, depth = 1) {
+        let geometry = new THREE.BoxGeometry(width, height, depth);
+        let material = new THREE.MeshNormalMaterial();
+        return new THREE.Mesh(geometry, material);
+    }
+
+    /**
+     * Renders the scene
+     * @return {void}
+     */
+    render() {
+        // render the scene
+        this.renderer.render(this.scene, this.camera);
+
+        // rotate cube each render
+        this.cube.rotation.x += this.rotVelocities.x;
+        this.cube.rotation.y += this.rotVelocities.y;
+        this.cube.rotation.z += this.rotVelocities.z;
+    }
+
+    /**
+     * gets cube rotation velocity on x axis
+     */
+    get rotX() {
+        return this.rotVelocities.x;
+    }
+
+    /**
+     * sets cube rotation velocity on x axis
+     */
+    set rotX(velocity: number) {
+        this.rotVelocities.x = velocity;
+    }
+
+    /**
+     * gets cube rotation velocity on y axis
+     */
+    get rotY() {
+        return this.rotVelocities.y;
+    }
+
+    /**
+     * sets cube rotation velocity on y axis
+     */
+    set rotY(velocity: number) {
+        this.rotVelocities.y = velocity;
+    }
+
+    /**
+     * gets cube rotation velocity on z axis
+     */
+    get rotZ() {
+        return this.rotVelocities.z;
+    }
+
+    /**
+     * sets cube rotation velocity on z axis
+     */
+    set rotZ(velocity: number) {
+        this.rotVelocities.z = velocity;
+    }
 }
-
-let cube = createCube();
-
-// create a cube and add it to the scene
-scene.add(cube);
-// add the camera to the scene
-scene.add(camera);
-// move camera back so we can see the cube
-camera.position.z = 2;
-// set the renderer size
-renderer.setSize(WIDTH, HEIGHT);
-
-/**
- * Renders the scene
- * @return {void}
- */
-export function render() {
-    requestAnimationFrame(render);
-    renderer.render(scene, camera);
-
-    // rotate cube a little each frame
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.02;
-    cube.rotation.z += 0.03;
-};

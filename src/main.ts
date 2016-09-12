@@ -1,7 +1,9 @@
 /// <reference path='typings/tsd.d.ts' />
 import { sayHello } from './greet';
-import { render as renderCube } from './cube';
-//import * as cube from './cube';
+import Cube from './cube';
+
+// a cube object
+let cube = new Cube('#3dcube');
 
 /**
  * Uses jQuery to update a div's contents
@@ -10,8 +12,18 @@ import { render as renderCube } from './cube';
  * @return {void}
  */
 function showHello(divName: string, name: string) {
-    const elt = $(`#${divName}`);//document.getElementById(divName);
-    elt.text(sayHello(name));
+    $(`#${divName}`).text(sayHello(name));
+}
+
+/**
+ * Takes the rotation on each axis of the cube and arbitrarily adds or subtracts
+ * 0.002
+ * @return {void}
+ */
+function changeItUp() {
+    cube.rotX = Math.random() > 0.5 ? cube.rotX + 0.002 : cube.rotX - 0.002;
+    cube.rotY = Math.random() > 0.5 ? cube.rotY + 0.002 : cube.rotY - 0.002;
+    cube.rotZ = Math.random() > 0.5 ? cube.rotZ + 0.002 : cube.rotZ - 0.002;
 }
 
 /**
@@ -19,9 +31,13 @@ function showHello(divName: string, name: string) {
  * @return {void}
  */
 function render() {
-  renderCube();
-  //cube.render();
+    //renderCube();
+    requestAnimationFrame(render);
+    cube.render();
 }
 
 showHello('greeting', 'TypeScript');
 render();
+
+// interval on changeItUp()
+let changeItUpInterval = setInterval(changeItUp, 250);
