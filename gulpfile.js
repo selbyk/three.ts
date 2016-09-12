@@ -15,6 +15,18 @@ let paths = {
     pages: ['src/*.html', 'src/*.css', 'src/*.png']
 };
 
+let watching = false;
+
+function handleError(err) {
+    console.error(err.toString());
+    if (watching) {
+        this.emit('end'); // jshint ignore:line
+    } else {
+        // if you want to be really specific
+        process.exit(1);
+    }
+}
+
 /**
  * Start webserver with live reload
  */
@@ -23,7 +35,8 @@ gulp.task('webserver', () => {
         .pipe(webserver({
             livereload: true,
             path: '/'
-        }));
+        }))
+        .on('error', handleError);
 });
 
 /**
@@ -31,7 +44,8 @@ gulp.task('webserver', () => {
  */
 gulp.task('copy-assets', () => {
     return gulp.src(paths.pages)
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('dist'))
+        .on('error', handleError);
 });
 
 /**
@@ -45,15 +59,23 @@ gulp.task('bundle', () => {
             cache: {},
             packageCache: {}
         })
+        .on('error', handleError)
         .plugin(tsify)
+        .on('error', handleError)
         .bundle()
+        .on('error', handleError)
         .pipe(source('bundle.js'))
+        .on('error', handleError)
         .pipe(buffer())
+        .on('error', handleError)
         .pipe(sourcemaps.init({
             loadMaps: true
         }))
+        .on('error', handleError)
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('dist'));
+        .on('error', handleError)
+        .pipe(gulp.dest('dist'))
+        .on('error', handleError);
 });
 
 /**
@@ -94,9 +116,9 @@ gulp.task('publish', ['build'], () => {
         .pipe(awspublish.reporter());
 });
 
-
-gulp.task('default', ['copy-assets', 'webserver', 'build'], () => {
+gulp.task('watch', () => {
     // Watch our assets
+    watching = true;
     let assetWatcher = gulp.watch(paths.pages, ['copy-assets']);
     assetWatcher.on('change', function(event) {
         console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
@@ -107,4 +129,8 @@ gulp.task('default', ['copy-assets', 'webserver', 'build'], () => {
     tsWatcher.on('change', function(event) {
         console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
     });
+});
+
+gulp.task('default', ['watch', 'copy-assets', 'webserver', 'build'], () => {
+    console.log('Started default command');
 });
